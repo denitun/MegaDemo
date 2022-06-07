@@ -23,7 +23,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-
+//chtob zakomitet smog
 @Component
 @Slf4j
 public class Bot extends TelegramLongPollingBot  {
