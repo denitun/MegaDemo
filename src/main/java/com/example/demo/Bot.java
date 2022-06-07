@@ -7,6 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -14,6 +16,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,14 +28,14 @@ import java.util.List;
 @Slf4j
 public class Bot extends TelegramLongPollingBot  {
 
+
     final
     BotConfig config;
-
     public Bot(BotConfig config){
         this.config = config;
     }
+    public void onUpdateReceived(Update update) {
 
-    public void onUpdateReceived(Update update){
         update.getUpdateId();
         SendMessage.SendMessageBuilder builder = SendMessage.builder();
         String messageText;
@@ -69,38 +76,35 @@ public class Bot extends TelegramLongPollingBot  {
         movies.add("Принц драконов 4 сезон");
 
 
-
         movies.add("");
         movies.add("");
         movies.add("");
         //
-        InlineKeyboardMarkup inlineKeyboardMarkup =new InlineKeyboardMarkup().builder().build();
-        InlineKeyboardMarkup inlineKeyboardMarkup2 =new InlineKeyboardMarkup().builder().build();
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup().builder().build();
+
 
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
         inlineKeyboardButton.setText("Добавить в избранное");
         InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton();
         inlineKeyboardButton2.setText("Уведомить");
-        InlineKeyboardButton inlineKeyboardButton3 = new InlineKeyboardButton();
-        inlineKeyboardButton3.setText("Подробнее");
+
         inlineKeyboardButton.setCallbackData("Button \"Добавить в избранное\" has been pressed");
         inlineKeyboardButton2.setCallbackData("Button \"Уведомить\" has been pressed");
-        inlineKeyboardButton3.setCallbackData("Button \"Подробнее\" has been pressed");
+
 
         List<InlineKeyboardButton> keyboardButtonsRow1 = new ArrayList<>();
         keyboardButtonsRow1.add(inlineKeyboardButton);
         List<InlineKeyboardButton> keyboardButtonsRow2 = new ArrayList<>();
         keyboardButtonsRow2.add(inlineKeyboardButton2);
-        List<InlineKeyboardButton> keyboardButtonOnlyRow = new ArrayList<>();
-        keyboardButtonOnlyRow.add(inlineKeyboardButton3);
+
 
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         rowList.add(keyboardButtonsRow1);
         rowList.add(keyboardButtonsRow2);
-        List<List<InlineKeyboardButton>> rowList2 = new ArrayList<>();
-        rowList2.add(keyboardButtonOnlyRow);
+
+
         inlineKeyboardMarkup.setKeyboard(rowList);
-        inlineKeyboardMarkup2.setKeyboard(rowList2);
+
 
         //return new SendMessage().setChatId(chatId).setMessageText("Пример").setReplyMarkup(inlineKeyboardMarkup);
 
@@ -136,30 +140,31 @@ public class Bot extends TelegramLongPollingBot  {
         replyKeyboardMarkup.setKeyboard(keyboard);
 
 
-
-        if(update.getMessage() != null){
+        if (update.getMessage() != null) {
             chatId = update.getMessage().getChatId().toString();
             builder.chatId(chatId);
             messageText = update.getMessage().getText();
         } else {
-            chatId = update.getChannelPost().getChatId().toString();
+            chatId = update.getCallbackQuery().getFrom().getId().toString();
             builder.chatId(chatId);
-            messageText = update.getChannelPost().getText();
+            messageText = update.getCallbackQuery().getMessage().getText();
         }
-        if(messageText.contains("/start")){
+        if (messageText.contains("/start")) {
             builder.text("Привет");
             builder.replyMarkup(inlineKeyboardMarkup);
             builder.replyMarkup(replyKeyboardMarkup);
-            try{
+            try {
                 execute(builder.build());
-            } catch (TelegramApiException e){
+            } catch (TelegramApiException e) {
                 log.debug(e.toString());
             }
         }
-        if(messageText.contains("Фильмы")){
+        if (messageText.contains("Фильмы")) {
             for (int i = 1; i < 8; i++) {
                 builder.text(movies.get(i).toString());
-                inlineKeyboardButton3.setCallbackData("привет");
+                InlineKeyboardMarkup inlineKeyboardMarkup2 = clava(i);
+
+
                 builder.replyMarkup(inlineKeyboardMarkup2);
                 try {
                     execute(builder.build());
@@ -168,52 +173,59 @@ public class Bot extends TelegramLongPollingBot  {
                 }
             }
         }
-        if(messageText.contains("Игры")){
+        if (messageText.contains("Игры")) {
             builder.text("Игры");
             builder.replyMarkup(inlineKeyboardMarkup);
-            try{
+            try {
                 execute(builder.build());
-            } catch (TelegramApiException e){
+            } catch (TelegramApiException e) {
                 log.debug(e.toString());
             }
         }
-        if(messageText.contains("Подробнее")){
+        if (update.getCallbackQuery() != null) {
+
             for (int i = 1; i < 8; i++) {
-                if (i == Integer.parseInt(inlineKeyboardButton3.getCallbackData())){
+                if (i == Integer.parseInt(update.getCallbackQuery().getData())) {
                     builder.text(movies.get(i).toString());
+
+
+                        SendPhoto message = new SendPhoto();
+                        message.setPhoto( new InputFile(new File("\"C:\\Users\\denis\\Desktop\\Солнышко рик и морти\"")));
+
+
                 }
             }
             builder.replyMarkup(inlineKeyboardMarkup);
-            try{
+            try {
                 execute(builder.build());
-            } catch (TelegramApiException e){
+            } catch (TelegramApiException e) {
                 log.debug(e.toString());
             }
-        }
 
-        if(messageText.contains("Другое")){
+        }
+        if (messageText.contains("Другое")) {
             builder.text("Другое");
             builder.replyMarkup(inlineKeyboardMarkup);
-            try{
+            try {
                 execute(builder.build());
-            } catch (TelegramApiException e){
+            } catch (TelegramApiException e) {
                 log.debug(e.toString());
             }
         }
-        if(messageText.contains("Всё")){
+        if (messageText.contains("Всё")) {
             builder.text("Всё");
             builder.replyMarkup(inlineKeyboardMarkup);
-            try{
+            try {
                 execute(builder.build());
-            } catch (TelegramApiException e){
+            } catch (TelegramApiException e) {
                 log.debug(e.toString());
             }
         }
-        if(messageText.contains("chatId")){
+        if (messageText.contains("chatId")) {
             builder.text("Id Канала : " + chatId);
-            try{
+            try {
                 execute(builder.build());
-            } catch (TelegramApiException e){
+            } catch (TelegramApiException e) {
                 log.debug(e.toString());
             }
         }
@@ -221,7 +233,23 @@ public class Bot extends TelegramLongPollingBot  {
 
 
 
+    }
 
+    public static InlineKeyboardMarkup clava (int i) {
+        InlineKeyboardMarkup inlineKeyboardMarkup2 = new InlineKeyboardMarkup().builder().build();
+
+        InlineKeyboardButton inlineKeyboardButton3 = new InlineKeyboardButton();
+        inlineKeyboardButton3.setText("Подробнее");
+
+        String callBackNumber = Integer.toString(i);
+        inlineKeyboardButton3.setCallbackData(callBackNumber);
+
+        List<InlineKeyboardButton> keyboardButtonOnlyRow = new ArrayList<>();
+        keyboardButtonOnlyRow.add(inlineKeyboardButton3);
+        List<List<InlineKeyboardButton>> rowList2 = new ArrayList<>();
+        rowList2.add(keyboardButtonOnlyRow);
+        inlineKeyboardMarkup2.setKeyboard(rowList2);
+        return inlineKeyboardMarkup2;
     }
     public String getBotUsername(){
         return config.getBotUserName();
