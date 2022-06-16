@@ -17,13 +17,6 @@
 		<java.version>11</java.version>
 	</properties>
 
-	<repositories>
-		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
-		</repository>
-	</repositories>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -40,7 +33,7 @@
 		<dependency>
 			<groupId>org.telegram</groupId>
 			<artifactId>telegrambots</artifactId>
-			<version>5.1.1</version>
+			<version>5.7.1</version>
 		</dependency>
 
 		<dependency>
@@ -65,20 +58,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-tomcat</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-
-
-
-		<dependency>
-			<groupId>com.github.rubenlagus</groupId>
-			<artifactId>TelegramBots</artifactId>
-			<version>4.1</version>
-		</dependency>
-
 	</dependencies>
 
 	<build>
